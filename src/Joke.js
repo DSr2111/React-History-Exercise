@@ -14,11 +14,11 @@ function Joke({ vote, votes, text, id }) {
   return (
     <div className="Joke">
       <div className="Joke-votearea">
-        <button onClick={(evt) => vote(id, +1)}>
+        <button onClick={upVote}>
           <i className="fas fa-thumbs-up" />
         </button>
 
-        <button onClick={(evt) => vote(id, -1)}>
+        <button onClick={downVote}>
           <i className="fas fa-thumbs-down" />
         </button>
 

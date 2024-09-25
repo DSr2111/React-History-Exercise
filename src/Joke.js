@@ -4,6 +4,13 @@ import './Joke.css';
 /** A single joke, along with vote up/down buttons. */
 
 function Joke({ vote, votes, text, id }) {
+  function upVote(evt) {
+    vote(id, +1);
+  }
+  function downVote(evt) {
+    vote(id, -1);
+  }
+
   return (
     <div className="Joke">
       <div className="Joke-votearea">

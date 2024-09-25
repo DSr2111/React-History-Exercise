@@ -1,59 +1,41 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Joke from "./Joke";
 import "./JokeList.css";
 
-/** List of jokes. */
+function JokeList({ numJokesToGet = 5 }) {
+  const [jokes, setJokes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-class JokeList extends Component {
-  static defaultProps = {
-    numJokesToGet: 5
-  };
+  /* get jokes if there are no jokes */
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      jokes: [],
-      isLoading: true
-    };
-
-    this.generateNewJokes = this.generateNewJokes.bind(this);
-    this.vote = this.vote.bind(this);
-  }
-
-  /* at mount, get jokes */
-
-  componentDidMount() {
-    this.getJokes();
-  }
-
-  /* retrieve jokes from API */
-
-  async getJokes() {
-    try {
-      // load jokes one at a time, adding not-yet-seen jokes
-      let jokes = [];
+  useEffect(function () {
+    async function getJokes() {
+      let j = [...jokes];
       let seenJokes = new Set();
+      try {
+        while (j.length < numJokesToGet) {
+          let res = await axios.get("https://icanhazdadjoke.com", {
+            headers: { Accept: "application/json" }
+          });
+          let { ...jokeObj } = res.data;
 
-      while (jokes.length < this.props.numJokesToGet) {
-        let res = await axios.get("https://icanhazdadjoke.com", {
-          headers: { Accept: "application/json" }
-        });
-        let { ...joke } = res.data;
-
-        if (!seenJokes.has(joke.id)) {
-          seenJokes.add(joke.id);
-          jokes.push({ ...joke, votes: 0 });
-        } else {
-          console.log("duplicate found!");
+          if (!seenJokes.has(jokeObj.id)) {
+            seenJokes.add(jokeObj.id);
+            j.push({ ...jokeObj, votes: 0 });
+          } else {
+            console.error("duplicate found!");
+          }
         }
+        setJokes(j);
+        setIsLoading(false)
+      } catch (err) {
+        console.error(err);
       }
-
-      this.setState({ jokes, isLoading: false });
-    } catch (err) {
-      console.error(err);
     }
-  }
+
+    if (jokes.length === 0) getJokes();
+  }, [jokes, numJokesToGet]);
 
   /* empty joke list, set to loading state, and then call getJokes */
 
